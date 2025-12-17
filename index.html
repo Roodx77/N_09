@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>09 | لعبة فلسفية نفسية</title>
+
+<style>
+body{
+  margin:0;
+  background:#0f0f0f;
+  color:#eaeaea;
+  font-family:Arial, sans-serif;
+  text-align:center;
+}
+
+.box{
+  max-width:600px;
+  margin:60px auto;
+  padding:30px;
+  background:#161616;
+  border-radius:16px;
+}
+
+.cover{
+  width:100%;
+  border-radius:12px;
+  margin-bottom:20px;
+}
+
+h1{
+  font-size:64px;
+  color:#4fd1c5;
+  margin:10px 0;
+}
+
+h2{
+  color:#4fd1c5;
+}
+
+p{
+  line-height:1.8;
+}
+
+.btn{
+  display:inline-block;
+  margin-top:30px;
+  padding:14px 28px;
+  background:#4fd1c5;
+  color:#000;
+  border:none;
+  border-radius:30px;
+  cursor:pointer;
+  font-size:16px;
+}
+
+.step{
+  opacity:.6;
+  font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box" id="game">
+  <img src="cover.png" class="cover" alt="09 cover">
+  <h1>09</h1>
+  <p>الدكتور يكشف السبب<br>المهندس يبني الحل</p>
+  <p class="step">9 نهاية الفهم — 0 بداية البناء</p>
+  <button class="btn" onclick="play(0)">ابدأ الرحلة</button>
+</div>
+
+<script>
+const emotions = [
+  ['الخوف','هروب','الوعي بالمصدر','مواجهة تدريجية'],
+  ['الغضب','اندفاع','ضبط النفس','تفريغ صحي'],
+  ['الحزن','انسحاب','التعبير','القبول ثم الفعل'],
+  ['القلق','تفكير زائد','الحضور','خطوة واحدة'],
+  ['العار','إخفاء','الرحمة الذاتية','مشاركة آمنة'],
+  ['الذنب','لوم الذات','الفصل','تصحيح الخطأ'],
+  ['الغيرة','مقارنة','الامتنان','تطوير الذات'],
+  ['الحسد','تمني الزوال','الاعتراف','تحويله لدافع'],
+  ['الإحباط','توقف','إعادة التقييم','تعديل الخطة'],
+  ['الوحدة','انعزال','الاتصال','طلب الدعم'],
+  ['الخجل','صمت','تقبل الذات','تجربة صغيرة'],
+  ['الكبرياء','إنكار','التواضع','الاعتراف'],
+  ['الكره','رفض','الفهم','تحرير المشاعر'],
+  ['اليأس','استسلام','المعنى','هدف صغير'],
+  ['الندم','الماضي','التعلم','قرار جديد'],
+  ['الارتباك','تشتت','التبسيط','اختيار واحد'],
+  ['الاشمئزاز','نفور','الفصل','إعادة تفسير'],
+  ['التعلق','اعتماد','الاستقلال','بناء ذاتي'],
+  ['الفراغ','لا معنى','الوعي','صناعة معنى']
+];
+
+const truths = [
+  'أنت لست انفعالك، أنت من يلاحظه',
+  'كل انفعال رسالة وليس عدواً',
+  'ما لا تفهمه سيقودك',
+  'الألم غير الواعي يعيد نفسه',
+  'الفهم يسبق التغيير دائماً',
+  'التحكم وهم… والوعي قوة',
+  'حين تصل للنهاية تعود للبداية بوعي جديد'
+];
+
+function play(i){
+  const game = document.getElementById('game');
+
+  if(i >= emotions.length){
+    game.innerHTML =
+      '<h1>7</h1>' +
+      truths.map(t => `<p>• ${t}</p>`).join('') +
+      '<p class="step">انتهت اللعبة… وبدأ الوعي</p>';
+    return;
+  }
+
+  const e = emotions[i];
+  game.innerHTML = `
+    <h2>${e[0]}</h2>
+    <p><b>التفاعل:</b> ${e[1]}</p>
+    <p><b>الحماية:</b> ${e[2]}</p>
+    <p><b>التصرف:</b> ${e[3]}</p>
+    <p class="step">${i+1} / ${emotions.length}</p>
+    <button class="btn" onclick="play(${i+1})">التالي</button>
+  `;
+}
+</script>
+
+</body>
+</html>
