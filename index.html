@@ -2,88 +2,188 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>N_09 – مرحلة القلق</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>09 – رحلة الانفعالات</title>
+
 <style>
-body {
+body{
+  margin:0;
   background:#0b0b0b;
   color:#eee;
-  font-family:Arial;
+  font-family:Arial, sans-serif;
   text-align:center;
   overflow:hidden;
 }
-#game {
-  margin-top:100px;
+
+.screen{
+  max-width:600px;
+  margin:80px auto;
+  padding:30px;
+  background:#161616;
+  border-radius:16px;
 }
-.thought {
+
+h1{font-size:64px;color:#4fd1c5;margin:10px 0;}
+h2{color:#4fd1c5;}
+
+.btn{
+  margin-top:30px;
+  padding:14px 30px;
+  background:#4fd1c5;
+  color:#000;
+  border:none;
+  border-radius:30px;
+  cursor:pointer;
+  font-size:16px;
+}
+
+.timer{
+  position:fixed;
+  top:20px;
+  right:20px;
+  font-size:18px;
+  color:#4fd1c5;
+}
+
+.thought{
   position:absolute;
   background:#222;
   padding:10px 16px;
   border-radius:20px;
-  animation: float 6s linear infinite;
   cursor:pointer;
+  animation: float 9s linear forwards;
 }
-@keyframes float {
-  from {transform:translateY(100vh);}
-  to {transform:translateY(-120px);}
-}
-.timer {
-  position:fixed;
-  top:20px;
-  right:20px;
-  font-size:20px;
-  color:#4fd1c5;
+
+@keyframes float{
+  from{transform:translateY(100vh);}
+  to{transform:translateY(-120px);}
 }
 </style>
 </head>
+
 <body>
 
-<div class="timer">⏱️ <span id="time">10</span></div>
-<div id="game">
-  <h2>القلق</h2>
-  <p>اختر الفكرة الصحيحة قبل نفاد الوقت</p>
+<div class="screen" id="startScreen">
+  <h1>09</h1>
+  <p>الدكتور يكشف السبب<br>المهندس يبني الحل</p>
+  <p style="opacity:.6">رحلة عبر 19 انفعال</p>
+  <button class="btn" onclick="startGame()">ابدأ الرحلة</button>
+</div>
+
+<div id="gameScreen" style="display:none;">
+  <div class="timer">⏱️ <span id="time">10</span></div>
+  <h2 id="emotionTitle"></h2>
+  <p id="emotionHint"></p>
 </div>
 
 <script>
-let time = 10;
-const correct = "أنا آمن الآن";
-
-const thoughts = [
-  correct,
-  "شي سيء سيحدث",
-  "أنت فاشل",
-  "لا تستطيع السيطرة",
-  "اهرب فوراً"
+/* ===== مراحل الانفعالات ===== */
+const stages = [
+  {name:"الخوف", correct:"أنا آمن الآن", thoughts:["اهرب","خطر قادم","أنا آمن الآن","سأفشل","شيء سيحدث"]},
+  {name:"الغضب", correct:"أتنفس قبل الرد", thoughts:["اضرب","صرخ","أتنفس قبل الرد","انتقم","دمّر"]},
+  {name:"الحزن", correct:"أسمح لنفسي بالحزن", thoughts:["انسحب","لا أحد يفهمني","أسمح لنفسي بالحزن","كل شيء انتهى"]},
+  {name:"القلق", correct:"هذه مجرد فكرة", thoughts:["ماذا لو","ستفشل","هذه مجرد فكرة","كارثة قادمة"]},
+  {name:"العار", correct:"أنا إنسان أتعلم", thoughts:["أنا سيئ","اختبئ","أنا إنسان أتعلم","لا يروني"]},
+  {name:"الذنب", correct:"أصلح الخطأ", thoughts:["ألوم نفسي","أنا فاسد","أصلح الخطأ","لا أستحق"]},
+  {name:"الغيرة", correct:"أركز على طريقي", thoughts:["هم أفضل","أنا أقل","أركز على طريقي","لماذا ليس أنا"]},
+  {name:"الحسد", correct:"أحوّله لدافع", thoughts:["أتمنى زواله","غير عادل","أحوّله لدافع"]},
+  {name:"الإحباط", correct:"أعدّل الخطة", thoughts:["توقف","لا فائدة","أعدّل الخطة","انسحب"]},
+  {name:"الوحدة", correct:"أتواصل مع شخص", thoughts:["انعزل","لا أحد","أتواصل مع شخص"]},
+  {name:"الخجل", correct:"أجرب خطوة صغيرة", thoughts:["اصمت","اختفِ","أجرب خطوة صغيرة"]},
+  {name:"الكبرياء", correct:"أعترف", thoughts:["أنا دائمًا صح","أنكر","أعترف"]},
+  {name:"الكره", correct:"أفهم ثم أترك", thoughts:["أرفض","أؤذي","أفهم ثم أترك"]},
+  {name:"اليأس", correct:"هدف صغير", thoughts:["استسلم","لا معنى","هدف صغير"]},
+  {name:"الندم", correct:"أتعلم", thoughts:["الماضي","لوم","أتعلم"]},
+  {name:"الارتباك", correct:"أختار واحد", thoughts:["تشتت","كل شيء","أختار واحد"]},
+  {name:"الاشمئزاز", correct:"أعيد التفسير", thoughts:["نفور","ابتعد","أعيد التفسير"]},
+  {name:"التعلق", correct:"أبني ذاتي", thoughts:["أحتاجك","لا أستطيع","أبني ذاتي"]},
+  {name:"الفراغ", correct:"أصنع معنى", thoughts:["لا شيء","ملل","أصنع معنى"]}
 ];
 
-const interval = setInterval(()=>{
-  time--;
-  document.getElementById("time").textContent = time;
-  if(time <= 0){
-    alert("القلق سيطر عليك");
-    location.reload();
-  }
-},1000);
+let stageIndex = 0;
+let time = 10;
+let timer, spawner;
 
-function spawnThought(text){
-  const d = document.createElement("div");
-  d.className = "thought";
-  d.textContent = text;
-  d.style.left = Math.random()*80+"%";
-  d.onclick = ()=>{
-    if(text === correct){
-      clearInterval(interval);
-      alert("أحسنت… سيطرت على القلق");
-    } else {
-      alert("فكرة مضللة");
-    }
-    d.remove();
-  };
-  document.body.appendChild(d);
+/* ===== بدء اللعبة ===== */
+function startGame(){
+  document.getElementById("startScreen").style.display="none";
+  document.getElementById("gameScreen").style.display="block";
+  loadStage();
 }
 
-setInterval(()=>{
-  spawnThought(thoughts[Math.floor(Math.random()*thoughts.length)]);
-},900);
+/* ===== تحميل مرحلة ===== */
+function loadStage(){
+  clearScreen();
+  time = 10;
+
+  const stage = stages[stageIndex];
+  document.getElementById("emotionTitle").textContent = stage.name;
+  document.getElementById("emotionHint").textContent = "اختر الفكرة الواعية";
+
+  document.getElementById("time").textContent = time;
+
+  timer = setInterval(()=>{
+    time--;
+    document.getElementById("time").textContent = time;
+    if(time<=0) endStage(false);
+  },1000);
+
+  spawner = setInterval(()=>{
+    spawnThought(stage);
+  },1400);
+}
+
+/* ===== إنشاء فكرة ===== */
+function spawnThought(stage){
+  const text = stage.thoughts[Math.floor(Math.random()*stage.thoughts.length)];
+  const d = document.createElement("div");
+  d.className="thought";
+  d.textContent=text;
+  d.style.left=Math.random()*70+"%";
+
+  d.onclick=()=>{
+    if(text===stage.correct){
+      endStage(true);
+    } else {
+      d.remove();
+    }
+  };
+
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),9000);
+}
+
+/* ===== نهاية المرحلة ===== */
+function endStage(success){
+  clearInterval(timer);
+  clearInterval(spawner);
+  clearScreen();
+
+  if(success){
+    stageIndex++;
+    if(stageIndex>=stages.length){
+      document.body.innerHTML=`
+        <div class="screen">
+          <h1>0</h1>
+          <p>انتهت الرحلة</p>
+          <p>أنت لست انفعالاتك… أنت من يلاحظها</p>
+        </div>`;
+    } else {
+      setTimeout(loadStage,1000);
+    }
+  } else {
+    document.body.innerHTML=`
+      <div class="screen">
+        <h1>✖</h1>
+        <p>الانفعال سيطر هذه المرة</p>
+        <button class="btn" onclick="location.reload()">إعادة المحاولة</button>
+      </div>`;
+  }
+}
+
+function clearScreen(){
+  document.querySelectorAll(".thought").forEach(t=>t.remove());
+}
 </script>
 
 </body>
