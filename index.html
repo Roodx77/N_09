@@ -2,242 +2,172 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>09 – رحلة الانفعالات</title>
-
 <style>
 body{
   margin:0;
-  background:#0b0b0b;
-  color:#eee;
-  font-family:Arial, sans-serif;
+  background:#0f0f0f;
+  color:#eaeaea;
+  font-family:Arial;
   text-align:center;
-  overflow:hidden;
 }
-
-.screen{
-  max-width:600px;
-  margin:80px auto;
-  padding:30px;
+#ui{
+  position:absolute;
+  top:20px;
+  width:100%;
+  pointer-events:none;
+}
+h1{color:#4fd1c5;margin:0}
+p{margin:5px}
+canvas{
+  display:block;
+  margin:80px auto 20px;
   background:#161616;
   border-radius:16px;
-  animation: fadeIn 1s ease;
 }
-
-@keyframes fadeIn{
-  from{opacity:0;}
-  to{opacity:1;}
-}
-
-h1{font-size:64px;color:#4fd1c5;margin:10px 0;}
-h2{color:#4fd1c5;}
-
 .btn{
-  margin-top:20px;
-  padding:12px 26px;
   background:#4fd1c5;
   color:#000;
   border:none;
+  padding:12px 24px;
   border-radius:30px;
   cursor:pointer;
-  font-size:15px;
-}
-
-.timer{
-  position:fixed;
-  top:20px;
-  right:20px;
-  font-size:18px;
-  color:#4fd1c5;
-}
-
-.controls{
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-}
-
-.thought{
-  position:absolute;
-  background:#222;
-  padding:10px 16px;
-  border-radius:20px;
-  cursor:pointer;
-  white-space:nowrap;
-  animation-name: float;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-}
-
-@keyframes float{
-  from{transform:translateY(100vh);}
-  to{transform:translateY(-120px);}
+  margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- شاشة البداية -->
-<div class="screen" id="startScreen">
-  <h1>09</h1>
-  <p>الدكتور يكشف السبب<br>المهندس يبني الحل</p>
-  <p style="opacity:.6">رحلة وعي عبر 19 انفعال</p>
-  <button class="btn" onclick="startGame()">ابدأ الرحلة</button>
+<div id="ui">
+  <h1 id="title">09</h1>
+  <p id="subtitle">رحلة داخل الانفعالات</p>
 </div>
 
-<!-- شاشة اللعب -->
-<div id="gameScreen" style="display:none;">
-  <div class="timer">⏱️ <span id="time">0</span></div>
-  <h2 id="emotionTitle"></h2>
-  <p id="emotionHint">اختر الفكرة الواعية</p>
-
-  <div class="controls">
-    <button class="btn" onclick="pauseGame()">توقف وتنفس</button>
-  </div>
-</div>
-
-<audio id="breathSound" loop>
-  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_7d1f8e5b90.mp3" type="audio/mpeg">
-</audio>
+<canvas id="game" width="360" height="360"></canvas>
+<button class="btn" onclick="startGame()">ابدأ الرحلة</button>
 
 <script>
-/* ================== المراحل ================== */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let stage = 0;
+let mode = "idle";
+let running = false;
+
 const stages = [
-  {name:"الخوف", correct:"أنا آمن الآن", thoughts:["اهرب","خطر","أنا آمن الآن"]},
-  {name:"الغضب", correct:"أتنفس قبل الرد", thoughts:["اضرب","صرخ","أتنفس قبل الرد"]},
-  {name:"الحزن", correct:"أسمح لنفسي بالحزن", thoughts:["انسحب","انتهى","أسمح لنفسي بالحزن"]},
-  {name:"القلق", correct:"هذه مجرد فكرة", thoughts:["ماذا لو","كارثة","هذه مجرد فكرة"]},
-  {name:"العار", correct:"أنا إنسان أتعلم", thoughts:["اختبئ","أنا سيئ","أنا إنسان أتعلم"]},
-  {name:"الذنب", correct:"أصلح الخطأ", thoughts:["ألوم نفسي","لا أستحق","أصلح الخطأ"]},
-  {name:"الغيرة", correct:"أركز على طريقي", thoughts:["هم أفضل","أنا أقل","أركز على طريقي"]},
-  {name:"الحسد", correct:"أحوّله لدافع", thoughts:["غير عادل","أتمنى زواله","أحوّله لدافع"]},
-  {name:"الإحباط", correct:"أعدّل الخطة", thoughts:["توقف","لا فائدة","أعدّل الخطة"]},
-  {name:"الوحدة", correct:"أتواصل مع شخص", thoughts:["انعزل","لا أحد","أتواصل مع شخص"]},
-  {name:"الخجل", correct:"أجرب خطوة صغيرة", thoughts:["اصمت","اختفِ","أجرب خطوة صغيرة"]},
-  {name:"الكبرياء", correct:"أعترف", thoughts:["أنكر","أنا صح","أعترف"]},
-  {name:"الكره", correct:"أفهم ثم أترك", thoughts:["أرفض","أؤذي","أفهم ثم أترك"]},
-  {name:"اليأس", correct:"هدف صغير", thoughts:["استسلم","لا معنى","هدف صغير"]},
-  {name:"الندم", correct:"أتعلم", thoughts:["الماضي","لوم","أتعلم"]},
-  {name:"الارتباك", correct:"أختار واحد", thoughts:["تشتت","كل شيء","أختار واحد"]},
-  {name:"الاشمئزاز", correct:"أعيد التفسير", thoughts:["نفور","ابتعد","أعيد التفسير"]},
-  {name:"التعلق", correct:"أبني ذاتي", thoughts:["أحتاجك","لا أستطيع","أبني ذاتي"]},
-  {name:"الفراغ", correct:"أصنع معنى", thoughts:["لا شيء","ملل","أصنع معنى"]}
+  {name:"الخوف", mode:"maze"},
+  {name:"القلق", mode:"snake"},
+  {name:"الغضب", mode:"speed"},
+  {name:"الحزن", mode:"blocks"},
+  {name:"التعلق", mode:"climb"},
+  {name:"الفراغ", mode:"still"}
 ];
 
-let stageIndex = 0;
-let time = 0;
-let timer, spawner;
-let paused = false;
+let player = {x:180,y:180,size:10,vx:0,vy:0};
+let snake = [{x:180,y:180}];
+let food = {x:100,y:100};
 
-function getSettings(i){
-  if(i < 6) return {time:26, spawn:2600, speed:15};
-  if(i < 13) return {time:18, spawn:1800, speed:11};
-  return {time:22, spawn:2300, speed:14};
-}
-
-/* ================== بدء اللعبة ================== */
 function startGame(){
-  document.getElementById("startScreen").style.display="none";
-  document.getElementById("gameScreen").style.display="block";
-  document.getElementById("breathSound").play();
+  stage = 0;
   loadStage();
+  running = true;
+  requestAnimationFrame(loop);
 }
 
-/* ================== تحميل مرحلة ================== */
 function loadStage(){
-  clearThoughts();
-  paused = false;
-
-  const stage = stages[stageIndex];
-  const s = getSettings(stageIndex);
-
-  time = s.time;
-  document.getElementById("time").textContent = time;
-  document.getElementById("emotionTitle").textContent = stage.name;
-
-  timer = setInterval(()=>{
-    if(!paused){
-      time--;
-      document.getElementById("time").textContent = time;
-      if(time<=0) endStage(false);
-    }
-  },1000);
-
-  setTimeout(()=>{
-    spawner = setInterval(()=>{
-      if(!paused) spawnThought(stage, s.speed);
-    }, s.spawn);
-  },1500);
+  const s = stages[stage];
+  document.getElementById("title").innerText = s.name;
+  document.getElementById("subtitle").innerText = "لاحظ… ولا تستعجل";
+  mode = s.mode;
+  reset();
 }
 
-/* ================== فكرة ================== */
-function spawnThought(stage, speed){
-  const d = document.createElement("div");
-  d.className="thought";
-  d.textContent=stage.thoughts[Math.floor(Math.random()*stage.thoughts.length)];
-  d.style.left=Math.random()*65+"%";
-  d.style.animationDuration=speed+"s";
-
-  d.onclick=()=>{
-    if(d.textContent===stage.correct){
-      endStage(true);
-    } else d.remove();
+function reset(){
+  player = {x:180,y:180,size:10,vx:0,vy:0};
+  snake = [{x:180,y:180}];
+  food = {
+    x:Math.random()*320+20,
+    y:Math.random()*320+20
   };
-
-  document.body.appendChild(d);
-  setTimeout(()=>d.remove(), speed*1000);
 }
 
-/* ================== توقف وتنفس ================== */
-function pauseGame(){
-  paused = !paused;
-  document.getElementById("emotionHint").textContent =
-    paused ? "تنفّس بعمق… خذ وقتك" : "اختر الفكرة الواعية";
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowUp"){player.vy=-1;player.vx=0;}
+  if(e.key==="ArrowDown"){player.vy=1;player.vx=0;}
+  if(e.key==="ArrowLeft"){player.vx=-1;player.vy=0;}
+  if(e.key==="ArrowRight"){player.vx=1;player.vy=0;}
+});
+
+function loop(){
+  if(!running) return;
+  ctx.clearRect(0,0,360,360);
+
+  if(mode==="snake") updateSnake();
+  else if(mode==="speed") updateSpeed();
+  else if(mode==="blocks") updateBlocks();
+  else if(mode==="climb") updateClimb();
+  else if(mode==="still") updateStill();
+  else updateMaze();
+
+  drawPlayer();
+  requestAnimationFrame(loop);
 }
 
-/* ================== نهاية ================== */
-function endStage(success){
-  clearInterval(timer);
-  clearInterval(spawner);
-  clearThoughts();
+function drawPlayer(){
+  ctx.fillStyle="#4fd1c5";
+  ctx.beginPath();
+  ctx.arc(player.x,player.y,player.size,0,Math.PI*2);
+  ctx.fill();
+}
 
-  if(success){
-    stageIndex++;
-    if(stageIndex >= stages.length){
-      document.body.innerHTML = `
-        <div class="screen">
-          <h1>0</h1>
-          <p>انتهت الرحلة</p>
-          <p style="opacity:.7">أنت لست انفعالاتك… أنت من يلاحظها</p>
-        </div>`;
-    } else {
-      transition();
-    }
+/* ===== أنماط اللعب ===== */
+
+function updateMaze(){
+  player.x+=player.vx;
+  player.y+=player.vy;
+}
+
+function updateSnake(){
+  player.x+=player.vx*2;
+  player.y+=player.vy*2;
+  ctx.fillStyle="#888";
+  ctx.fillRect(food.x,food.y,8,8);
+}
+
+function updateSpeed(){
+  player.x+=player.vx*4;
+  player.y+=player.vy*4;
+}
+
+function updateBlocks(){
+  player.x+=player.vx;
+  player.y+=player.vy;
+  ctx.fillStyle="#333";
+  ctx.fillRect(140,140,80,80);
+}
+
+function updateClimb(){
+  player.y+=player.vy;
+}
+
+function updateStill(){
+  // لا حركة – فقط وجود
+}
+
+/* ===== انتقال تلقائي ===== */
+setInterval(()=>{
+  if(!running) return;
+  stage++;
+  if(stage>=stages.length){
+    running=false;
+    document.getElementById("title").innerText="انتهت الرحلة";
+    document.getElementById("subtitle").innerText="الوعي هو الفوز";
   } else {
-    document.body.innerHTML = `
-      <div class="screen">
-        <h1>✖</h1>
-        <p>انجرفت مع الانفعال</p>
-        <button class="btn" onclick="location.reload()">إعادة المحاولة</button>
-      </div>`;
+    loadStage();
   }
-}
-
-/* ================== انتقال بصري ================== */
-function transition(){
-  document.getElementById("gameScreen").innerHTML = `
-    <div class="screen">
-      <p style="opacity:.6">انتقل بوعي…</p>
-    </div>`;
-  setTimeout(loadStage,1200);
-}
-
-function clearThoughts(){
-  document.querySelectorAll(".thought").forEach(t=>t.remove());
-}
+},20000);
 </script>
 
 </body>
-  </html>
+</html>
