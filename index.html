@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>09 – رحلة الانفعالات (شخصين)</title>
+<title>09 | تحليل الانفعالات</title>
 
 <style>
 body{
@@ -12,127 +12,134 @@ body{
   font-family:Arial;
   text-align:center;
 }
-h1{color:#4fd1c5;margin:10px}
-p{margin:4px;font-size:14px}
-canvas{
-  background:#161616;
-  display:block;
-  margin:10px auto;
-  border-radius:14px;
+.container{
+  max-width:700px;
+  margin:40px auto;
+  padding:20px;
 }
-#hint{opacity:.7}
+h1{color:#4fd1c5}
+select, textarea, button{
+  width:100%;
+  margin-top:15px;
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  font-size:16px;
+}
+textarea{height:100px; resize:none}
+button{
+  background:#4fd1c5;
+  color:#000;
+  cursor:pointer;
+}
+.result{
+  margin-top:25px;
+  padding:20px;
+  background:#161616;
+  border-radius:14px;
+  text-align:right;
+  line-height:1.8;
+}
+.fade{opacity:.7}
 </style>
 </head>
 
 <body>
 
-<h1 id="stageTitle">09</h1>
-<p id="hint">لاعب 1: الأسهم ⬅⬆⬇➡ — لاعب 2: WASD</p>
-<canvas id="game" width="360" height="360"></canvas>
-<p id="progress"></p>
+<div class="container">
+  <h1>09</h1>
+  <p class="fade">اختر انفعالك… أو صفه بكلماتك</p>
+
+  <select id="emotionSelect">
+    <option value="">— اختر انفعالًا —</option>
+    <option>الخوف</option>
+    <option>الغضب</option>
+    <option>الحزن</option>
+    <option>القلق</option>
+    <option>العار</option>
+    <option>الذنب</option>
+    <option>الغيرة</option>
+    <option>الحسد</option>
+    <option>الإحباط</option>
+    <option>الوحدة</option>
+    <option>الخجل</option>
+    <option>الكبرياء</option>
+    <option>الكره</option>
+    <option>اليأس</option>
+    <option>الندم</option>
+    <option>الارتباك</option>
+    <option>الاشمئزاز</option>
+    <option>التعلق</option>
+    <option>الفراغ</option>
+    <option value="other">أخرى…</option>
+  </select>
+
+  <textarea id="customEmotion" placeholder="اكتب ما تشعر به…" style="display:none"></textarea>
+
+  <button onclick="analyze()">تحليل الشعور</button>
+
+  <div id="result" class="result" style="display:none"></div>
+</div>
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-const title = document.getElementById("stageTitle");
-const progress = document.getElementById("progress");
+const responses = {
+  "الخوف": "الخوف يظهر عندما تشعر أن شيئًا ما قد يهددك. غالبًا هو دعوة للحذر لا للهروب. اسأل نفسك: هل الخطر حقيقي أم متخيّل؟",
+  "الغضب": "الغضب طاقة. أحيانًا يحمي حدودك، وأحيانًا يستهلكك. ما الحد الذي تشعر أنه تم تجاوزه؟",
+  "الحزن": "الحزن لا يعني الضعف، بل يعني أنك فقدت شيئًا مهمًا. السؤال ليس: لماذا حزنت؟ بل: ماذا كان يعني لك ما فقدته؟",
+  "القلق": "القلق محاولة للسيطرة على مستقبل غير مضمون. أنت الآن في ذهنك أكثر من واقعك. ما الشيء الوحيد الذي يمكنك فعله الآن فقط؟",
+  "العار": "العار يجعلك تختبئ، لكنه لا يعالج شيئًا. أنت لست الخطأ الذي حدث. ماذا لو عاملت نفسك كإنسان يتعلّم؟",
+  "الذنب": "الذنب يشير لقيمك. إن كان حقيقيًا فهو دعوة للتصحيح، وإن كان زائدًا فهو عقاب غير ضروري. أيهما تشعر؟",
+  "الغيرة": "الغيرة مرآة لرغبة غير مشبعة. بدل أن ترفضها، اسأل: ماذا تقول لي عن احتياجي؟",
+  "الحسد": "الحسد يتمنى زوال ما عند الآخر. خلفه غالبًا شعور بالعجز. ما الخطوة الصغيرة التي تعيد لك قوتك؟",
+  "الإحباط": "الإحباط يظهر حين تتصادم التوقعات مع الواقع. هل تحتاج لتغيير الخطة أم التوقع؟",
+  "الوحدة": "الوحدة ليست غياب الناس فقط، بل غياب الشعور بالفهم. مع من يمكنك أن تكون على حقيقتك؟",
+  "الخجل": "الخجل خوف من الظهور. غالبًا مبني على حكم قد لا يحدث. ماذا لو لم يكن أحد يراقب؟",
+  "الكبرياء": "الكبرياء يحميك من الشعور بالنقص، لكنه يعزلك. ما الذي يصعب عليك الاعتراف به؟",
+  "الكره": "الكره يحمل طاقة رفض قوية. أحيانًا يخفي ألمًا قديمًا. ماذا يحدث لو نظرت خلفه؟",
+  "اليأس": "اليأس ليس نهاية، بل توقف عن التوقع. ما المعنى الصغير الذي لا يزال ممكنًا؟",
+  "الندم": "الندم دليل وعي متأخر. السؤال الأهم: ماذا تعلّمت، وكيف ستتصرف بشكل مختلف؟",
+  "الارتباك": "الارتباك يعني كثرة الخيارات مع غياب الوضوح. ما أبسط قرار يمكنك اتخاذه الآن؟",
+  "الاشمئزاز": "الاشمئزاز يحميك من ما تراه ملوثًا. هل الرفض هنا جسدي أم فكري؟",
+  "التعلق": "التعلق خوف من الفقد. كلما زاد، زاد القلق. ماذا يبقى منك دون هذا الارتباط؟",
+  "الفراغ": "الفراغ مساحة، لا نقصًا بالضرورة. ربما حان وقت خلق معنى جديد."
+};
 
-const stages = [
- "الخوف","الغضب","الحزن","القلق","العار","الذنب","الغيرة",
- "الحسد","الإحباط","الوحدة","الخجل","الكبرياء","الكره",
- "اليأس","الندم","الارتباك","الاشمئزاز","التعلق","الفراغ"
-];
+function analyze(){
+  const select = document.getElementById("emotionSelect");
+  const custom = document.getElementById("customEmotion");
+  const result = document.getElementById("result");
 
-let stageIndex = 0;
-let time = 0;
+  let text = "";
 
-const p1 = {x:180,y:180,vx:0,vy:0,color:"#4fd1c5"};
-const p2 = {x:100,y:100,vx:0,vy:0,color:"#888"};
-
-let speedFactor = 1;
-
-function loadStage(){
-  title.textContent = stages[stageIndex];
-  progress.textContent = `${stageIndex+1} / 19`;
-  time = 0;
-
-  p1.x=180; p1.y=180;
-  p2.x=100; p2.y=100;
-
-  // تغيير الإحساس حسب المرحلة
-  if(stageIndex < 6) speedFactor = 1;
-  else if(stageIndex < 13) speedFactor = 2;
-  else speedFactor = 0.7;
-}
-
-document.addEventListener("keydown",e=>{
-  // لاعب 1
-  if(e.key==="ArrowUp"){p1.vy=-1;p1.vx=0;}
-  if(e.key==="ArrowDown"){p1.vy=1;p1.vx=0;}
-  if(e.key==="ArrowLeft"){p1.vx=-1;p1.vy=0;}
-  if(e.key==="ArrowRight"){p1.vx=1;p1.vy=0;}
-
-  // لاعب 2 (يؤثر على الجو)
-  if(e.key==="w"){p2.vy=-1;}
-  if(e.key==="s"){p2.vy=1;}
-  if(e.key==="a"){p2.vx=-1;}
-  if(e.key==="d"){p2.vx=1;}
-});
-
-function update(){
-  time++;
-
-  // لاعب 2 يغيّر الإيقاع
-  speedFactor = 1 + Math.abs(p2.vx+p2.vy)*0.3;
-
-  p1.x += p1.vx * speedFactor;
-  p1.y += p1.vy * speedFactor;
-
-  // حدود
-  p1.x=Math.max(10,Math.min(350,p1.x));
-  p1.y=Math.max(10,Math.min(350,p1.y));
-
-  // انتقال تلقائي كل 20 ثانية
-  if(time > 1200){
-    stageIndex++;
-    if(stageIndex>=stages.length){
-      title.textContent="انتهت الرحلة";
-      progress.textContent="الوعي بينكما";
+  if(select.value === "other"){
+    const input = custom.value.trim();
+    if(!input){
+      alert("اكتب شعورك أولًا");
       return;
     }
-    loadStage();
+
+    text =
+      "من كلماتك يظهر مزيج من مشاعر متداخلة.\n\n" +
+      "أحيانًا لا يكون الشعور اسمًا واحدًا، بل حالة.\n" +
+      "سؤالي لك:\n" +
+      "ما أكثر كلمة كتبتها تشعر أنها تمثلك الآن؟";
+
+  } else if(select.value){
+    text = responses[select.value];
+  } else {
+    alert("اختر انفعالًا أو اكتب شعورك");
+    return;
   }
+
+  result.style.display = "block";
+  result.textContent = text;
 }
 
-function draw(){
-  ctx.clearRect(0,0,360,360);
-
-  // تأثير بصري خفيف
-  ctx.fillStyle="rgba(255,255,255,0.03)";
-  ctx.fillRect(0,0,360,360);
-
-  // لاعب 1
-  ctx.fillStyle=p1.color;
-  ctx.beginPath();
-  ctx.arc(p1.x,p1.y,8,0,Math.PI*2);
-  ctx.fill();
-
-  // لاعب 2 (ظل/تأثير)
-  ctx.strokeStyle=p2.color;
-  ctx.beginPath();
-  ctx.arc(p2.x,p2.y,14,0,Math.PI*2);
-  ctx.stroke();
-}
-
-function loop(){
-  update();
-  draw();
-  requestAnimationFrame(loop);
-}
-
-loadStage();
-loop();
+document.getElementById("emotionSelect").addEventListener("change",e=>{
+  document.getElementById("customEmotion").style.display =
+    e.target.value === "other" ? "block" : "none";
+});
 </script>
 
 </body>
-</html>
+  </html>
