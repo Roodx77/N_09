@@ -2,15 +2,14 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>09</title>
-
+<title>09 - لعبة الانفعالات</title>
 <style>
 body{
   margin:0;
   min-height:100vh;
   background:
     linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)),
-    url("bg.jpg");
+    url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/..."); /* ضع هنا Base64 كامل للصورة */
   background-size:cover;
   background-position:center;
   font-family:Arial;
@@ -49,7 +48,6 @@ button{
 }
 </style>
 </head>
-
 <body>
 
 <div class="box">
@@ -58,8 +56,6 @@ button{
 
   <select id="emotion">
     <option value="">— اختر —</option>
-
-    <!-- سلبية -->
     <option>الخوف</option>
     <option>القلق</option>
     <option>الحزن</option>
@@ -72,8 +68,6 @@ button{
     <option>الحسد</option>
     <option>اليأس</option>
     <option>الارتباك</option>
-
-    <!-- إيجابية / عاطفية -->
     <option>الحب</option>
     <option>الإعجاب</option>
     <option>الاشتياق</option>
@@ -81,19 +75,14 @@ button{
     <option>الطمأنينة</option>
     <option>الامتنان</option>
     <option>الفرح</option>
-
-    <!-- عقلية -->
     <option>التفكير</option>
     <option>الحيرة</option>
     <option>التردد</option>
-
     <option value="other">أخرى…</option>
   </select>
 
   <textarea id="custom" placeholder="اكتب ما تشعر به…" style="display:none"></textarea>
-
   <button onclick="respond()">اسمعني</button>
-
   <div id="output" class="result"></div>
 </div>
 
@@ -111,7 +100,6 @@ const replies = {
   الحسد:"الحسد رغبة لم تُعترف بعد.",
   اليأس:"اليأس تعب طويل بلا معنى واضح.",
   الارتباك:"الارتباك تعدد أصوات داخلك.",
-
   الحب:"الحب حضور لا يحتاج تفسير.",
   الإعجاب:"الإعجاب بداية فضول.",
   الاشتياق:"الاشتياق أثر علاقة حيّة.",
@@ -119,15 +107,15 @@ const replies = {
   الطمأنينة:"الطمأنينة ثقة هادئة.",
   الامتنان:"الامتنان وعي بالنعم.",
   الفرح:"الفرح لحظة امتلاء.",
-
   التفكير:"التفكير محاولة للفهم.",
   الحيرة:"الحيرة تعني أن القرار مهم.",
   التردد:"التردد خوف من الخطأ."
 };
 
-async function respond(){
-  const e = emotion.value;
-  const text = custom.value.trim();
+function respond(){
+  const e = document.getElementById("emotion").value;
+  const text = document.getElementById("custom").value.trim();
+  const output = document.getElementById("output");
   output.textContent = "";
 
   if(!e){ alert("اختر انفعالًا"); return; }
@@ -139,20 +127,11 @@ async function respond(){
 
   if(!text){ alert("اكتب شعورك"); return; }
 
-  output.textContent = "أفكر معك…";
-
-  const r = await fetch("https://YOUR-SERVER-URL/analyze",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ text })
-  });
-
-  const d = await r.json();
-  output.textContent = d.reply;
+  output.textContent = "لقد أدخلت شعورك: " + text + "\nيمكنك تأمل شعورك والتفكير فيه…";
 }
 
-emotion.onchange = ()=>{
-  custom.style.display = emotion.value==="other" ? "block" : "none";
+document.getElementById("emotion").onchange = ()=>{
+  document.getElementById("custom").style.display = document.getElementById("emotion").value==="other" ? "block" : "none";
 };
 </script>
 
