@@ -2,144 +2,159 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>09 | تحليل الانفعالات</title>
+<title>09</title>
 
 <style>
 body{
   margin:0;
-  background:#0f0f0f;
-  color:#eaeaea;
+  min-height:100vh;
+  background:
+    linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)),
+    url("bg.jpg");
+  background-size:cover;
+  background-position:center;
   font-family:Arial;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#eaeaea;
+}
+.box{
+  background:rgba(22,22,22,.85);
+  padding:30px;
+  border-radius:20px;
+  max-width:420px;
+  width:90%;
   text-align:center;
 }
-.container{
-  max-width:700px;
-  margin:40px auto;
-  padding:20px;
-}
-h1{color:#4fd1c5}
-select, textarea, button{
+h1{color:#4fd1c5;margin-top:0}
+select,textarea,button{
   width:100%;
   margin-top:15px;
   padding:12px;
-  border-radius:10px;
+  border-radius:12px;
   border:none;
-  font-size:16px;
+  font-size:15px;
 }
-textarea{height:100px; resize:none}
+textarea{resize:none;height:90px}
 button{
   background:#4fd1c5;
   color:#000;
   cursor:pointer;
 }
 .result{
-  margin-top:25px;
-  padding:20px;
-  background:#161616;
-  border-radius:14px;
-  text-align:right;
-  line-height:1.8;
+  margin-top:20px;
+  line-height:1.7;
+  opacity:.9;
 }
-.fade{opacity:.7}
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="box">
   <h1>09</h1>
-  <p class="fade">اختر انفعالك… أو صفه بكلماتك</p>
+  <p>ما الانفعال الذي تشعر به الآن؟</p>
 
-  <select id="emotionSelect">
-    <option value="">— اختر انفعالًا —</option>
+  <select id="emotion">
+    <option value="">— اختر —</option>
+
+    <!-- سلبية -->
     <option>الخوف</option>
-    <option>الغضب</option>
-    <option>الحزن</option>
     <option>القلق</option>
+    <option>الحزن</option>
+    <option>الغضب</option>
     <option>العار</option>
     <option>الذنب</option>
-    <option>الغيرة</option>
-    <option>الحسد</option>
     <option>الإحباط</option>
     <option>الوحدة</option>
-    <option>الخجل</option>
-    <option>الكبرياء</option>
-    <option>الكره</option>
+    <option>الغيرة</option>
+    <option>الحسد</option>
     <option>اليأس</option>
-    <option>الندم</option>
     <option>الارتباك</option>
-    <option>الاشمئزاز</option>
-    <option>التعلق</option>
-    <option>الفراغ</option>
+
+    <!-- إيجابية / عاطفية -->
+    <option>الحب</option>
+    <option>الإعجاب</option>
+    <option>الاشتياق</option>
+    <option>الحنين</option>
+    <option>الطمأنينة</option>
+    <option>الامتنان</option>
+    <option>الفرح</option>
+
+    <!-- عقلية -->
+    <option>التفكير</option>
+    <option>الحيرة</option>
+    <option>التردد</option>
+
     <option value="other">أخرى…</option>
   </select>
 
-  <textarea id="customEmotion" placeholder="اكتب ما تشعر به…" style="display:none"></textarea>
+  <textarea id="custom" placeholder="اكتب ما تشعر به…" style="display:none"></textarea>
 
-  <button onclick="analyze()">تحليل الشعور</button>
+  <button onclick="respond()">اسمعني</button>
 
-  <div id="result" class="result" style="display:none"></div>
+  <div id="output" class="result"></div>
 </div>
 
 <script>
-const responses = {
-  "الخوف": "الخوف يظهر عندما تشعر أن شيئًا ما قد يهددك. غالبًا هو دعوة للحذر لا للهروب. اسأل نفسك: هل الخطر حقيقي أم متخيّل؟",
-  "الغضب": "الغضب طاقة. أحيانًا يحمي حدودك، وأحيانًا يستهلكك. ما الحد الذي تشعر أنه تم تجاوزه؟",
-  "الحزن": "الحزن لا يعني الضعف، بل يعني أنك فقدت شيئًا مهمًا. السؤال ليس: لماذا حزنت؟ بل: ماذا كان يعني لك ما فقدته؟",
-  "القلق": "القلق محاولة للسيطرة على مستقبل غير مضمون. أنت الآن في ذهنك أكثر من واقعك. ما الشيء الوحيد الذي يمكنك فعله الآن فقط؟",
-  "العار": "العار يجعلك تختبئ، لكنه لا يعالج شيئًا. أنت لست الخطأ الذي حدث. ماذا لو عاملت نفسك كإنسان يتعلّم؟",
-  "الذنب": "الذنب يشير لقيمك. إن كان حقيقيًا فهو دعوة للتصحيح، وإن كان زائدًا فهو عقاب غير ضروري. أيهما تشعر؟",
-  "الغيرة": "الغيرة مرآة لرغبة غير مشبعة. بدل أن ترفضها، اسأل: ماذا تقول لي عن احتياجي؟",
-  "الحسد": "الحسد يتمنى زوال ما عند الآخر. خلفه غالبًا شعور بالعجز. ما الخطوة الصغيرة التي تعيد لك قوتك؟",
-  "الإحباط": "الإحباط يظهر حين تتصادم التوقعات مع الواقع. هل تحتاج لتغيير الخطة أم التوقع؟",
-  "الوحدة": "الوحدة ليست غياب الناس فقط، بل غياب الشعور بالفهم. مع من يمكنك أن تكون على حقيقتك؟",
-  "الخجل": "الخجل خوف من الظهور. غالبًا مبني على حكم قد لا يحدث. ماذا لو لم يكن أحد يراقب؟",
-  "الكبرياء": "الكبرياء يحميك من الشعور بالنقص، لكنه يعزلك. ما الذي يصعب عليك الاعتراف به؟",
-  "الكره": "الكره يحمل طاقة رفض قوية. أحيانًا يخفي ألمًا قديمًا. ماذا يحدث لو نظرت خلفه؟",
-  "اليأس": "اليأس ليس نهاية، بل توقف عن التوقع. ما المعنى الصغير الذي لا يزال ممكنًا؟",
-  "الندم": "الندم دليل وعي متأخر. السؤال الأهم: ماذا تعلّمت، وكيف ستتصرف بشكل مختلف؟",
-  "الارتباك": "الارتباك يعني كثرة الخيارات مع غياب الوضوح. ما أبسط قرار يمكنك اتخاذه الآن؟",
-  "الاشمئزاز": "الاشمئزاز يحميك من ما تراه ملوثًا. هل الرفض هنا جسدي أم فكري؟",
-  "التعلق": "التعلق خوف من الفقد. كلما زاد، زاد القلق. ماذا يبقى منك دون هذا الارتباط؟",
-  "الفراغ": "الفراغ مساحة، لا نقصًا بالضرورة. ربما حان وقت خلق معنى جديد."
+const replies = {
+  الخوف:"الخوف إشارة حماية، لا عدو.",
+  القلق:"القلق تفكير في مستقبل لم يحدث بعد.",
+  الحزن:"الحزن دليل على قيمة ما فُقد.",
+  الغضب:"الغضب طاقة لحد تم تجاوزه.",
+  العار:"العار خوف من أن تُرى كما أنت.",
+  الذنب:"الذنب يعني أن ضميرك حي.",
+  الإحباط:"الإحباط فجوة بين التوقع والواقع.",
+  الوحدة:"الوحدة غياب الفهم لا غياب الناس.",
+  الغيرة:"الغيرة مرآة لما نتمناه.",
+  الحسد:"الحسد رغبة لم تُعترف بعد.",
+  اليأس:"اليأس تعب طويل بلا معنى واضح.",
+  الارتباك:"الارتباك تعدد أصوات داخلك.",
+
+  الحب:"الحب حضور لا يحتاج تفسير.",
+  الإعجاب:"الإعجاب بداية فضول.",
+  الاشتياق:"الاشتياق أثر علاقة حيّة.",
+  الحنين:"الحنين ذاكرة تشعر.",
+  الطمأنينة:"الطمأنينة ثقة هادئة.",
+  الامتنان:"الامتنان وعي بالنعم.",
+  الفرح:"الفرح لحظة امتلاء.",
+
+  التفكير:"التفكير محاولة للفهم.",
+  الحيرة:"الحيرة تعني أن القرار مهم.",
+  التردد:"التردد خوف من الخطأ."
 };
 
-function analyze(){
-  const select = document.getElementById("emotionSelect");
-  const custom = document.getElementById("customEmotion");
-  const result = document.getElementById("result");
+async function respond(){
+  const e = emotion.value;
+  const text = custom.value.trim();
+  output.textContent = "";
 
-  let text = "";
+  if(!e){ alert("اختر انفعالًا"); return; }
 
-  if(select.value === "other"){
-    const input = custom.value.trim();
-    if(!input){
-      alert("اكتب شعورك أولًا");
-      return;
-    }
-
-    text =
-      "من كلماتك يظهر مزيج من مشاعر متداخلة.\n\n" +
-      "أحيانًا لا يكون الشعور اسمًا واحدًا، بل حالة.\n" +
-      "سؤالي لك:\n" +
-      "ما أكثر كلمة كتبتها تشعر أنها تمثلك الآن؟";
-
-  } else if(select.value){
-    text = responses[select.value];
-  } else {
-    alert("اختر انفعالًا أو اكتب شعورك");
+  if(e !== "other"){
+    output.textContent = replies[e] || "لاحظ شعورك بهدوء.";
     return;
   }
 
-  result.style.display = "block";
-  result.textContent = text;
+  if(!text){ alert("اكتب شعورك"); return; }
+
+  output.textContent = "أفكر معك…";
+
+  const r = await fetch("https://YOUR-SERVER-URL/analyze",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ text })
+  });
+
+  const d = await r.json();
+  output.textContent = d.reply;
 }
 
-document.getElementById("emotionSelect").addEventListener("change",e=>{
-  document.getElementById("customEmotion").style.display =
-    e.target.value === "other" ? "block" : "none";
-});
+emotion.onchange = ()=>{
+  custom.style.display = emotion.value==="other" ? "block" : "none";
+};
 </script>
 
 </body>
-  </html>
+</html>
