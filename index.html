@@ -64,7 +64,7 @@ button{
 
   <select id="emotion">
     <option value="">— اختر —</option>
-    <!-- هنا نضع 77 شعور -->
+    <!-- أضف 77 شعور هنا -->
     <option>الخوف</option>
     <option>القلق</option>
     <option>الحزن</option>
@@ -169,7 +169,7 @@ button{
   </select>
 
   <textarea id="custom" placeholder="اكتب شعورك…" style="display:none"></textarea>
-  <button onclick="sendEmotion()">إرسال</button>
+  <button onclick="sendEmotion()">حلل الانفعال</button>
 
   <div id="reply" class="result"></div>
 </div>
@@ -194,7 +194,7 @@ async function sendEmotion(){
       body:JSON.stringify({text:value})
     });
     const data = await res.json();
-    output.innerText = data.reply || "خطأ في الرد";
+    output.innerText = data.reply || "خطأ في الرد من AI";
   } catch(e){
     output.innerText = "خطأ في الاتصال بالـ AI";
   }
