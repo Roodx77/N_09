@@ -2,43 +2,48 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>09 - لعبة الانفعالات</title>
+<title>09 | تحليل الانفعالات</title>
+
+<!-- صورة عند مشاركة الرابط -->
+<meta property="og:title" content="09 | لعبة تحليل الانفعالات">
+<meta property="og:description" content="اختر انفعالك واقرأ تحليله الفلسفي.">
+<meta property="og:image" content="preview.jpg">
+<meta property="og:type" content="website">
+
 <style>
 body{
   margin:0;
   min-height:100vh;
+  background:#000;
+  color:#eee;
   font-family: Arial, sans-serif;
   display:flex;
   justify-content:center;
   align-items:center;
-  background: linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6));
-  color:#eaeaea;
 }
 
 .box{
-  background:
-    linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)),
-    url("background.jpg") center / cover no-repeat;
+  width:90%;
+  max-width:520px;
+  background:#111;
   padding:30px;
   border-radius:20px;
-  max-width:500px;
-  width:90%;
   text-align:center;
-  text-shadow:1px 1px 3px #000;
 }
 
-h1{color:#4fd1c5;margin-top:0}
+h1{
+  margin-top:0;
+  color:#4fd1c5;
+}
 
-select,textarea,button{
+select,button{
   width:100%;
+  padding:14px;
   margin-top:15px;
-  padding:12px;
-  border-radius:12px;
   border:none;
-  font-size:15px;
+  border-radius:12px;
+  font-size:16px;
 }
-
-textarea{resize:none;height:90px}
 
 button{
   background:#4fd1c5;
@@ -48,158 +53,66 @@ button{
 
 .result{
   margin-top:20px;
-  line-height:1.7;
-  opacity:.95;
-  background:rgba(0,0,0,.25);
-  padding:12px;
+  background:#000;
+  padding:15px;
   border-radius:12px;
+  line-height:1.8;
+}
+.short{
+  opacity:.8;
+  margin-top:10px;
 }
 </style>
 </head>
-<body>
 
+<body>
 <div class="box">
   <h1>09</h1>
-  <p>اختر شعورك أو اكتبه:</p>
+  <p>اختر انفعالك:</p>
 
   <select id="emotion">
     <option value="">— اختر —</option>
-    <!-- أضف 77 شعور هنا -->
-    <option>الخوف</option>
-    <option>القلق</option>
-    <option>الحزن</option>
-    <option>الغضب</option>
-    <option>العار</option>
-    <option>الذنب</option>
-    <option>الإحباط</option>
-    <option>الوحدة</option>
-    <option>الغيرة</option>
-    <option>الحسد</option>
-    <option>اليأس</option>
-    <option>الارتباك</option>
-    <option>الخجل</option>
-    <option>التوتر</option>
-    <option>الضغط</option>
-    <option>الاستياء</option>
-    <option>الاحباط النفسي</option>
-    <option>الاحباط المهني</option>
-    <option>الاحباط العاطفي</option>
-    <option>القلق الاجتماعي</option>
-    <option>الحب</option>
-    <option>الإعجاب</option>
-    <option>الاشتياق</option>
-    <option>الحنين</option>
-    <option>الطمأنينة</option>
-    <option>الامتنان</option>
-    <option>الفرح</option>
-    <option>السرور</option>
-    <option>الحماس</option>
-    <option>الرضا</option>
-    <option>الارتياح</option>
-    <option>التفاؤل</option>
-    <option>الشغف</option>
-    <option>البهجة</option>
-    <option>المودة</option>
-    <option>السعادة</option>
-    <option>السكينة</option>
-    <option>الراحة</option>
-    <option>الفخر</option>
-    <option>الحب العاطفي</option>
-    <option>الانجذاب</option>
-    <option>الاهتمام</option>
-    <option>العطف</option>
-    <option>الدفء</option>
-    <option>التفكير</option>
-    <option>الحيرة</option>
-    <option>التردد</option>
-    <option>التركيز</option>
-    <option>التأمل</option>
-    <option>الوعي</option>
-    <option>التخطيط</option>
-    <option>التحليل</option>
-    <option>الفهم</option>
-    <option>الخيال</option>
-    <option>الابداع</option>
-    <option>الانتباه</option>
-    <option>الملاحظة</option>
-    <option>المرونة</option>
-    <option>التقدير</option>
-    <option>المنطق</option>
-    <option>التقييم</option>
-    <option>الاختيار</option>
-    <option>الحساب</option>
-    <option>القرارات</option>
-    <option>الترابط</option>
-    <option>الادراك</option>
-    <option>التحفيز الذاتي</option>
-    <option>الاستنتاج</option>
-    <option>التعلم</option>
-    <option>التطوير الذاتي</option>
-    <option>التحليل النفسي</option>
-    <option>المعرفة</option>
-    <option>الاستبصار</option>
-    <option>الذكاء</option>
-    <option>الحكمة</option>
-    <option>الحدس</option>
-    <option>التصور</option>
-    <option>التركيبة</option>
-    <option>المنهجية</option>
-    <option>المراجعة</option>
-    <option>التقدير الذاتي</option>
-    <option>الوعي الذاتي</option>
-    <option>التحكم</option>
-    <option>الموازنة</option>
-    <option>القياس</option>
-    <option>التنظيم</option>
-    <option>التوثيق</option>
-    <option>التحليل المنطقي</option>
-    <option>التمييز</option>
-    <option>الفهم العميق</option>
-    <option>التعقل</option>
-    <option>التأويل</option>
-    <option>الملاحظة الدقيقة</option>
-    <option>الإدراك العاطفي</option>
-    <option>المقارنة</option>
-    <option>التخمين</option>
-    <option>التجربة</option>
-    <option>التفسير</option>
-    <option>الاستنتاج المنطقي</option>
-    <option>المعرفة التطبيقية</option>
-    <option value="other">أخرى…</option>
   </select>
 
-  <textarea id="custom" placeholder="اكتب شعورك…" style="display:none"></textarea>
-  <button onclick="sendEmotion()">حلل الانفعال</button>
+  <button onclick="analyze()">حلل الانفعال</button>
 
-  <div id="reply" class="result"></div>
+  <div id="output" class="result"></div>
 </div>
 
 <script>
-const emotionSelect = document.getElementById("emotion");
-const customInput = document.getElementById("custom");
-const output = document.getElementById("reply");
+const emotions = [
+"الخوف","القلق","الحزن","الغضب","العار","الذنب","الإحباط","الوحدة","الغيرة","الحسد",
+"اليأس","الارتباك","الخجل","التوتر","الضغط","الاستياء","الشك","الفراغ","الملل","الانكسار",
+"الحب","الإعجاب","الاشتياق","الحنين","الطمأنينة","الامتنان","الفرح","السرور","الحماس","الرضا",
+"الارتياح","التفاؤل","الشغف","البهجة","المودة","السعادة","السكينة","الراحة","الفخر","الانجذاب",
+"التفكير","الحيرة","التردد","التركيز","التأمل","الوعي","التخطيط","التحليل","الفهم","الخيال",
+"الابداع","الانتباه","الملاحظة","المرونة","التقدير","المنطق","التقييم","الاختيار","القرارات","الإدراك",
+"الحكمة","الحدس","الاستبصار","التعلم","التطور","النضج","المسؤولية","الحرية","الانتماء","القوة",
+"الضعف","القبول","الرفض","التحرر","السلام الداخلي","الصراع","الشك الذاتي","الأمل","الخسارة","النهاية"
+];
 
-emotionSelect.onchange = () => {
-  customInput.style.display = emotionSelect.value==="other"?"block":"none";
-};
+const analysis = {};
+emotions.forEach(e=>{
+  analysis[e] = {
+    deep:`${e} ليس شعورًا عابرًا، بل إشارة داخلية تكشف علاقتك بذاتك وبالعالم. عندما يظهر ${e} فهو يطلب فهماً لا مقاومة.`,
+    short:`لاحظ ${e} ولا تحكم عليه.`
+  };
+});
 
-async function sendEmotion(){
-  const value = emotionSelect.value==="other"?customInput.value:emotionSelect.value;
-  if(!value) return;
+const select = document.getElementById("emotion");
+emotions.forEach(e=>{
+  const o = document.createElement("option");
+  o.textContent = e;
+  select.appendChild(o);
+});
 
-  try{
-    const res = await fetch("/api/ai", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({text:value})
-    });
-    const data = await res.json();
-    output.innerText = data.reply || "خطأ في الرد من AI";
-  } catch(e){
-    output.innerText = "خطأ في الاتصال بالـ AI";
-  }
+function analyze(){
+  const e = select.value;
+  if(!e) return;
+  document.getElementById("output").innerHTML =
+    `<div>${analysis[e].deep}</div>
+     <div class="short">${analysis[e].short}</div>`;
 }
 </script>
-
 </body>
-  </html>
+</html>
