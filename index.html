@@ -1,39 +1,41 @@
 <script>
+document.addEventListener("DOMContentLoaded", () => {
+
 const data = {
   "الخوف":{
-    deep:"الخوف ينشأ عندما يتقدم المجهول على الفهم. هو ليس ضعفًا، بل وعي مبكر بالخطر قبل أن يُسمّى.",
+    deep:"الخوف ينشأ عندما يتقدم المجهول على الفهم. هو ليس ضعفًا، بل وعي مبكر بالخطر.",
     short:"الخوف يسبق الشجاعة."
   },
   "القلق":{
-    deep:"القلق هو تفكير بلا أرض. العقل يركض نحو احتمالات لم تقع بعد، فيتعب قبل أن يبدأ.",
+    deep:"القلق تفكير بلا أرض. العقل يركض نحو مستقبل لم يحدث.",
     short:"القلق مستقبل متخيَّل."
   },
   "الحزن":{
-    deep:"الحزن ليس انكسارًا، بل اعتراف داخلي بقيمة ما فُقد. من لا يحزن لم يحب.",
-    short:"الحزن ذاكرة القلب."
+    deep:"الحزن اعتراف داخلي بقيمة ما فُقد.",
+    short:"الحزن ذاكرة."
   },
   "الغضب":{
-    deep:"الغضب طاقة غير موجهة. إن لم تُفهم تحوّلت إلى تدمير، وإن فُهمت أصبحت قوة تغيير.",
-    short:"الغضب طاقة."
+    deep:"الغضب طاقة، إن لم تُفهم أحرقت صاحبها.",
+    short:"الغضب قوة غير موجهة."
   },
   "الوحدة":{
-    deep:"الوحدة لا تعني غياب الناس، بل غياب الشعور بأنك مفهوم.",
+    deep:"الوحدة غياب الشعور بأنك مفهوم، لا غياب الناس.",
     short:"الوحدة فجوة فهم."
   },
   "الحب":{
-    deep:"الحب حضور كامل دون محاولة امتلاك. هو قبول الآخر دون تعديل.",
+    deep:"الحب حضور كامل دون امتلاك.",
     short:"الحب وعي."
   },
   "الامتنان":{
-    deep:"الامتنان وعي هادئ بأن ما لديك لم يكن مضمونًا.",
+    deep:"الامتنان وعي بأن ما لديك لم يكن مضمونًا.",
     short:"الامتنان سلام."
   },
   "الفرح":{
-    deep:"الفرح لحظة انسجام نادرة بين الداخل والخارج.",
+    deep:"الفرح انسجام نادر بين الداخل والخارج.",
     short:"الفرح توافق."
   },
   "التفكير":{
-    deep:"التفكير محاولة لترتيب الفوضى الداخلية. ليس كل تفكير حلًا، لكنه بداية.",
+    deep:"التفكير محاولة لترتيب الفوضى الداخلية.",
     short:"التفكير بحث."
   },
   "الحيرة":{
@@ -41,38 +43,27 @@ const data = {
     short:"الحيرة نضج."
   },
   "الأمل":{
-    deep:"الأمل قرار داخلي بالاستمرار رغم غياب الضمان.",
+    deep:"الأمل قرار بالاستمرار رغم غياب الضمان.",
     short:"الأمل اختيار."
   },
   "اليأس":{
-    deep:"اليأس تعب طويل دون معنى واضح. ليس نهاية، بل توقف مؤقت.",
+    deep:"اليأس تعب طويل بلا معنى.",
     short:"اليأس إنهاك."
   },
   "السلام الداخلي":{
-    deep:"السلام الداخلي ليس غياب المشاكل، بل غياب الصراع معها.",
+    deep:"السلام الداخلي غياب الصراع لا غياب المشاكل.",
     short:"السلام قبول."
   }
 };
 
-// باقي الانفعالات تأخذ تحليل عام محترم (بدون تكرار حرفي)
 function fallback(emotion){
   return {
-    deep:`${emotion} حالة داخلية تعبّر عن تفاعل بين الفكر والتجربة. فهمها أهم من مقاومتها.`,
+    deep:`${emotion} حالة داخلية تعبّر عن علاقة الفكر بالتجربة.`,
     short:`لاحظ ${emotion} بهدوء.`
   };
 }
 
-const emotions = Object.keys(data);
-const select = document.getElementById("emotion");
-
-// إضافة الانفعالات للقائمة
-emotions.forEach(e=>{
-  const o = document.createElement("option");
-  o.textContent = e;
-  select.appendChild(o);
-});
-
-// إضافة بقية الانفعالات من قائمتك القديمة (إن لم تكن موجودة)
+const baseEmotions = Object.keys(data);
 const allEmotions = [
 "الخجل","التوتر","الضغط","الاستياء","الشك","الملل","الانكسار",
 "الإعجاب","الاشتياق","الحنين","الطمأنينة","السرور","الحماس","الرضا",
@@ -85,23 +76,27 @@ const allEmotions = [
 "التحرر","الصراع","الشك الذاتي","الخسارة","النهاية"
 ];
 
-allEmotions.forEach(e=>{
-  if(!emotions.includes(e)){
-    const o = document.createElement("option");
-    o.textContent = e;
-    select.appendChild(o);
-  }
+const emotions = [...new Set([...baseEmotions, ...allEmotions])];
+const select = document.getElementById("emotion");
+const output = document.getElementById("output");
+
+emotions.forEach(e=>{
+  const o = document.createElement("option");
+  o.textContent = e;
+  select.appendChild(o);
 });
 
-function analyze(){
+window.analyze = function(){
   const e = select.value;
   if(!e) return;
 
   const res = data[e] || fallback(e);
 
-  document.getElementById("output").innerHTML = `
+  output.innerHTML = `
     <div>${res.deep}</div>
     <div class="short">${res.short}</div>
   `;
-}
-  </script>
+};
+
+});
+      </script>
