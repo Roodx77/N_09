@@ -2,14 +2,15 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>09 | تحليل الانفعالات</title>
+<title>لعبة العلاقات</title>
+
 <style>
 body{
   margin:0;
   min-height:100vh;
   background:#000;
   color:#eee;
-  font-family: Arial, sans-serif;
+  font-family:Arial;
   display:flex;
   justify-content:center;
   align-items:center;
@@ -17,28 +18,22 @@ body{
 
 .box{
   width:90%;
-  max-width:520px;
+  max-width:500px;
   background:#111;
   padding:30px;
   border-radius:20px;
   text-align:center;
 }
 
-h1{
-  margin-top:0;
-  color:#4fd1c5;
-}
+h1{color:#4fd1c5}
 
-select,button{
+button{
   width:100%;
   padding:14px;
-  margin-top:15px;
+  margin-top:10px;
   border:none;
   border-radius:12px;
   font-size:16px;
-}
-
-button{
   background:#4fd1c5;
   color:#000;
   cursor:pointer;
@@ -49,99 +44,91 @@ button{
   background:#000;
   padding:15px;
   border-radius:12px;
-  line-height:1.8;
-}
-.short{
-  opacity:.8;
-  margin-top:10px;
+  line-height:1.7;
 }
 </style>
 </head>
 
 <body>
+
 <div class="box">
-  <h1>09</h1>
-  <p>اختر انفعالك:</p>
+  <h1>🎮</h1>
 
-  <select id="emotion">
-    <option value="">— اختر —</option>
-  </select>
+  <div id="stage"></div>
 
-  <button id="analyzeBtn">حلل الانفعال</button>
-
-  <div id="output" class="result"></div>
+  <div id="result" class="result"></div>
 </div>
 
 <script>
-// قائمة 100 انفعال
-const emotions = [
-"الخوف","القلق","الحزن","الغضب","العار","الذنب","الإحباط","الوحدة","الغيرة","الحسد",
-"اليأس","الارتباك","الخجل","التوتر","الضغط","الاستياء","الشك","الفراغ","الملل","الانكسار",
-"الحب","الإعجاب","الاشتياق","الحنين","الطمأنينة","الامتنان","الفرح","السرور","الحماس","الرضا",
-"الارتياح","التفاؤل","الشغف","البهجة","المودة","السعادة","السكينة","الراحة","الفخر","الانجذاب",
-"التفكير","الحيرة","التردد","التركيز","التأمل","الوعي","التخطيط","التحليل","الفهم","الخيال",
-"الابداع","الانتباه","الملاحظة","المرونة","التقدير","المنطق","التقييم","الاختيار","القرارات","الإدراك",
-"الحكمة","الحدس","الاستبصار","التعلم","التطور","النضج","المسؤولية","الحرية","الانتماء","القوة",
-"الضعف","القبول","الرفض","التحرر","السلام الداخلي","الصراع","الشك الذاتي","الأمل","الخسارة","النهاية",
-"الرضا النفسي","التقدير الذاتي","المحبة العائلية","الحنان","الانجذاب الرومانسي","الإعجاب الشخصي",
-"النجاح","الفشل","الملل الشديد","الفضول","الدهشة","الارتباك العاطفي","الرهبة","التسامح","الكرم","الحماس العاطفي",
-"الطمأنينة الداخلية","الشغف العميق","التركيز العالي","التوازن النفسي","الرضا الذاتي","التحدي","الحكمة العميقة",
-"التأمل العميق","الحذر","الانتباه الفائق","المثابرة","الابداع العالي","الاسترخاء","الرضا العام","الانسجام الداخلي",
-"الحيوية","الاعتزاز بالنفس","الوعي العاطفي","الانفتاح","التحفيز الداخلي","الاستبصار الذاتي","الراحة النفسية","الطمأنينة الروحية"
-];
-
-// تحليل مختلف لكل انفعال
-const analysis = {
-"الخوف": {deep:"الخوف يحفزك على الانتباه للتحديات القادمة.", short:"الخوف تنبيه."},
-"القلق": {deep:"القلق يعكس رغبتك في السيطرة على المجهول.", short:"القلق إشعار."},
-"الحزن": {deep:"الحزن يذكرك بقيمة ما فقدت.", short:"الحزن اعتراف."},
-"الغضب": {deep:"الغضب طاقة تحتاج التوجيه.", short:"الغضب قوة."},
-"العار": {deep:"العار يظهر عند تصادم قيمك الداخلية مع الواقع.", short:"العار انعكاس."},
-"الذنب": {deep:"الذنب شعور يربطك بالمسؤولية.", short:"الذنب وعي."},
-"الإحباط": {deep:"الإحباط دعوة لإعادة تقييم التوقعات.", short:"الإحباط مراجعة."},
-"الوحدة": {deep:"الوحدة لحظة لتفهم ذاتك.", short:"الوحدة فرصة."},
-"الغيرة": {deep:"الغيرة مرآة لرغباتك الخفية.", short:"الغيرة مراقبة."},
-"الحسد": {deep:"الحسد يعكس نقصًا مؤقتًا في الرضا.", short:"الحسد إدراك."},
-"اليأس": {deep:"اليأس اختبار لصبرك الداخلي.", short:"اليأس تجربة."},
-"الارتباك": {deep:"الارتباك يشير لتعدد الخيارات أمامك.", short:"الارتباك مؤشر."},
-"الخجل": {deep:"الخجل شعور بحماية الذات.", short:"الخجل وعي."},
-"التوتر": {deep:"التوتر إشارات الجسد للتأهب.", short:"التوتر جسدي."},
-"الضغط": {deep:"الضغط يختبر قدرتك على التنظيم.", short:"الضغط اختبار."},
-"الاستياء": {deep:"الاستياء يعكس حاجات لم تُلبَّى.", short:"الاستياء تذكير."},
-"الشك": {deep:"الشك يدفعك للبحث عن الحقيقة.", short:"الشك استفسار."},
-"الفراغ": {deep:"الفراغ دعوة للإبداع والتجديد.", short:"الفراغ مساحة."},
-"الملل": {deep:"الملل فرصة لاكتشاف اهتمامات جديدة.", short:"الملل تحفيز."},
-"الانكسار": {deep:"الانكسار يعكس صعوبة التكيف.", short:"الانكسار درس."},
-// بقية الانفعالات تأخذ تحليل عام مخصص سريع
+let state = {
+  type:null,
+  decision:null
 };
 
-emotions.forEach(e=>{
-  if(!analysis[e]){
-    analysis[e] = {
-      deep:`${e} شعور فريد يحتاج التفهم والوعي.`,
-      short:`لاحظ ${e} بحذر.`
-    };
-  }
-});
+const stage = document.getElementById("stage");
+const result = document.getElementById("result");
 
-// إضافة الانفعالات للقائمة
-const select = document.getElementById("emotion");
-emotions.forEach(e=>{
-  const o = document.createElement("option");
-  o.textContent = e;
-  select.appendChild(o);
-});
-
-// زر التحليل
-document.getElementById("analyzeBtn").onclick = ()=>{
-  const e = select.value;
-  if(!e) return;
-  const res = analysis[e];
-  document.getElementById("output").innerHTML = `
-    <div>${res.deep}</div>
-    <div class="short">${res.short}</div>
+// المرحلة 1
+function stage1(){
+  stage.innerHTML = `
+    <p>وش وضعك؟</p>
+    <button onclick="chooseType('ex')">💔 اكس</button>
+    <button onclick="chooseType('lover')">❤️ حبيب</button>
   `;
-};
+}
+
+// المرحلة 2
+function stage2(){
+  if(state.type==="ex"){
+    stage.innerHTML = `
+      <p>وش تبي تسوي؟</p>
+      <button onclick="chooseDecision('revenge')">🔥 انتقام</button>
+      <button onclick="chooseDecision('move')">🧘‍♂️ تخطي</button>
+    `;
+  }else{
+    stage.innerHTML = `
+      <p>وش هدفك؟</p>
+      <button onclick="chooseDecision('stay')">❤️ استمرار</button>
+      <button onclick="chooseDecision('think')">🤔 تقييم</button>
+    `;
+  }
+}
+
+// النتيجة
+function showResult(){
+  let text = "";
+
+  if(state.type==="ex" && state.decision==="revenge"){
+    text = "أنت تحاول تعويض الألم بالسيطرة، لكن الانتقام يربطك بالماضي أكثر.";
+  }
+  else if(state.type==="ex" && state.decision==="move"){
+    text = "أنت بدأت تفهم أن التخطي قوة، وليس هروب.";
+  }
+  else if(state.type==="lover" && state.decision==="stay"){
+    text = "أنت تميل للاستقرار، لكن تأكد أن الاستمرار مبني على وعي.";
+  }
+  else if(state.type==="lover" && state.decision==="think"){
+    text = "أنت تبحث عن فهم العلاقة، وهذا يدل على نضج.";
+  }
+
+  stage.innerHTML = `<p>النتيجة:</p>`;
+  result.innerText = text;
+}
+
+// التحكم
+function chooseType(t){
+  state.type = t;
+  stage2();
+}
+
+function chooseDecision(d){
+  state.decision = d;
+  showResult();
+}
+
+// بدء اللعبة
+stage1();
 </script>
+
 </body>
 </html>
