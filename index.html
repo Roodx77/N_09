@@ -2,38 +2,35 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>لعبة العلاقات</title>
+<title>لعبة الشخصية</title>
 
 <style>
 body{
   margin:0;
-  min-height:100vh;
   background:#000;
   color:#eee;
   font-family:Arial;
   display:flex;
   justify-content:center;
   align-items:center;
+  min-height:100vh;
 }
 
 .box{
   width:90%;
   max-width:500px;
   background:#111;
-  padding:30px;
+  padding:25px;
   border-radius:20px;
   text-align:center;
 }
 
-h1{color:#4fd1c5}
-
 button{
   width:100%;
-  padding:14px;
+  padding:12px;
   margin-top:10px;
   border:none;
-  border-radius:12px;
-  font-size:16px;
+  border-radius:10px;
   background:#4fd1c5;
   color:#000;
   cursor:pointer;
@@ -41,10 +38,6 @@ button{
 
 .result{
   margin-top:20px;
-  background:#000;
-  padding:15px;
-  border-radius:12px;
-  line-height:1.7;
 }
 </style>
 </head>
@@ -52,82 +45,147 @@ button{
 <body>
 
 <div class="box">
-  <h1>🎮</h1>
-
-  <div id="stage"></div>
-
+  <h2 id="title">مرحلة 1</h2>
+  <div id="question"></div>
+  <div id="answers"></div>
+  <button onclick="next()">التالي</button>
   <div id="result" class="result"></div>
 </div>
 
 <script>
-let state = {
-  type:null,
-  decision:null
+let stage = 0;
+let qIndex = 0;
+
+let score = {
+  leader:0,
+  emotional:0,
+  logical:0
 };
 
-const stage = document.getElementById("stage");
-const result = document.getElementById("result");
+const stages = [
 
-// المرحلة 1
-function stage1(){
-  stage.innerHTML = `
-    <p>وش وضعك؟</p>
-    <button onclick="chooseType('ex')">💔 اكس</button>
-    <button onclick="chooseType('lover')">❤️ حبيب</button>
-  `;
-}
+  // 1 عامة
+  [
+    {q:"تحب تقضي وقتك؟",a:[
+      ["مع الناس","emotional"],
+      ["لوحدك","logical"],
+      ["تنظم شي","leader"]
+    ]},
+    {q:"قرار سريع؟",a:[
+      ["نعم","leader"],
+      ["أفكر","logical"],
+      ["حسب شعوري","emotional"]
+    ]}
+  ],
 
-// المرحلة 2
-function stage2(){
-  if(state.type==="ex"){
-    stage.innerHTML = `
-      <p>وش تبي تسوي؟</p>
-      <button onclick="chooseDecision('revenge')">🔥 انتقام</button>
-      <button onclick="chooseDecision('move')">🧘‍♂️ تخطي</button>
-    `;
-  }else{
-    stage.innerHTML = `
-      <p>وش هدفك؟</p>
-      <button onclick="chooseDecision('stay')">❤️ استمرار</button>
-      <button onclick="chooseDecision('think')">🤔 تقييم</button>
-    `;
+  // 2 شخصية
+  [
+    {q:"أنت أقرب؟",a:[
+      ["قائد","leader"],
+      ["حساس","emotional"],
+      ["محلل","logical"]
+    ]}
+  ],
+
+  // 3 الجنس
+  [
+    {q:"تفضل؟",a:[
+      ["قيادة","leader"],
+      ["اهتمام","emotional"],
+      ["تفكير","logical"]
+    ]}
+  ],
+
+  // 4 المزاج
+  [
+    {q:"مزاجك غالبًا؟",a:[
+      ["هادئ","logical"],
+      ["متقلب","emotional"],
+      ["متحكم","leader"]
+    ]}
+  ],
+
+  // 5 سياسة
+  [
+    {q:"قرارات؟",a:[
+      ["حازمة","leader"],
+      ["مرنة","emotional"],
+      ["مدروسة","logical"]
+    ]}
+  ],
+
+  // 6 دول
+  [
+    {q:"تحب؟",a:[
+      ["نظام","logical"],
+      ["حرية","emotional"],
+      ["قوة","leader"]
+    ]}
+  ],
+
+  // 7 نهاية
+  []
+];
+
+function loadQuestion(){
+  document.getElementById("result").innerText = "";
+
+  if(stage >= stages.length-1){
+    showResult();
+    return;
   }
+
+  let data = stages[stage][qIndex];
+
+  document.getElementById("title").innerText = "مرحلة " + (stage+1);
+  document.getElementById("question").innerText = data.q;
+
+  let html = "";
+  data.a.forEach(ans=>{
+    html += `<button onclick="choose('${ans[1]}')">${ans[0]}</button>`;
+  });
+
+  document.getElementById("answers").innerHTML = html;
 }
 
-// النتيجة
+function choose(type){
+  score[type]++;
+}
+
+function next(){
+  qIndex++;
+
+  if(qIndex >= stages[stage].length){
+    stage++;
+    qIndex = 0;
+  }
+
+  loadQuestion();
+}
+
 function showResult(){
+  let max = Math.max(score.leader, score.emotional, score.logical);
+
   let text = "";
 
-  if(state.type==="ex" && state.decision==="revenge"){
-    text = "أنت تحاول تعويض الألم بالسيطرة، لكن الانتقام يربطك بالماضي أكثر.";
+  if(max === score.leader){
+    text = "🔥 شخصية قيادية: تحب السيطرة واتخاذ القرار.";
   }
-  else if(state.type==="ex" && state.decision==="move"){
-    text = "أنت بدأت تفهم أن التخطي قوة، وليس هروب.";
+  else if(max === score.emotional){
+    text = "❤️ شخصية عاطفية: تعتمد على المشاعر والارتباط.";
   }
-  else if(state.type==="lover" && state.decision==="stay"){
-    text = "أنت تميل للاستقرار، لكن تأكد أن الاستمرار مبني على وعي.";
-  }
-  else if(state.type==="lover" && state.decision==="think"){
-    text = "أنت تبحث عن فهم العلاقة، وهذا يدل على نضج.";
+  else{
+    text = "🧠 شخصية منطقية: تفكر وتحلل قبل أي قرار.";
   }
 
-  stage.innerHTML = `<p>النتيجة:</p>`;
-  result.innerText = text;
+  document.getElementById("title").innerText = "النتيجة";
+  document.getElementById("question").innerText = "";
+  document.getElementById("answers").innerHTML = "";
+  document.getElementById("result").innerText = text;
 }
 
-// التحكم
-function chooseType(t){
-  state.type = t;
-  stage2();
-}
-
-function chooseDecision(d){
-  state.decision = d;
-  showResult();
-}
-
-// بدء اللعبة
-stage1();
+// تشغيل
+loadQuestion();
 </script>
 
 </body>
